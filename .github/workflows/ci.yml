@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint, types y tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Fijar versión de Python
+        run: uv python install
+
+      - name: Sincronizar entorno (congelado al lock)
+        run: uv sync --frozen
+
+      - name: Ruff (formato)
+        run: uv run ruff format --check .
+
+      - name: Ruff (lint)
+        run: uv run ruff check .
+
+      - name: Mypy (tipos)
+        run: uv run mypy src/
+
+      - name: Pytest
+        run: uv run pytest

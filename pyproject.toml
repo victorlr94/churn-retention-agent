@@ -1,0 +1,83 @@
+[project]
+name = "churn-retention-agent"
+version = "0.1.0"
+description = "Agente de retención anti-churn con human-in-the-loop: modelo de propensión calibrado + agente LLM que razona sobre economía de ofertas (EV = P(retener)·CLTV − costo)."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+    { name = "Victor Manuel Lugo Ramirez", email = "victorlr9412@gmail.com" },
+]
+keywords = ["churn", "retention", "llm-agent", "ml", "telco"]
+dependencies = [
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+]
+
+[project.urls]
+Homepage = "https://github.com/victorlr/churn-retention-agent"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.2",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "pre-commit>=3.7",
+]
+
+[build-system]
+requires = ["uv_build>=0.11,<0.12"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "churn_agent"
+module-root = "src"
+
+# ----------------------------------------------------------------------------
+# Calidad de código (skill: python-code-quality)
+# ----------------------------------------------------------------------------
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "SIM"]
+ignore = []
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+# Estricto en el núcleo reutilizable
+[[tool.mypy.overrides]]
+module = "churn_agent.*"
+strict = true
+
+# Relajado en exploración
+[[tool.mypy.overrides]]
+module = "notebooks.*"
+ignore_errors = true
+
+# ----------------------------------------------------------------------------
+# Testing (skill: testing-strategy)
+# ----------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --cov=churn_agent --cov-report=term-missing"
+markers = [
+    "unit: pruebas unitarias rápidas y deterministas",
+    "integration: pruebas que cruzan componentes",
+    "security: pruebas de guardrails y casos adversariales",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["src/churn_agent"]

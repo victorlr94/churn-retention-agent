@@ -1,0 +1,40 @@
+# Pre-commit: calidad (Ruff + mypy) y seguridad (gitleaks) antes de cada commit.
+# Instalar:  uv run pre-commit install
+# Correr en todo el repo:  uv run pre-commit run --all-files
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.0
+    hooks:
+      - id: ruff          # lint
+        args: [--fix]
+      - id: ruff-format   # formato (reemplaza a Black)
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [pydantic, pydantic-settings]
+        args: [--ignore-missing-imports]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files   # bloquea binarios pesados por error
+        args: [--maxkb=1024]
+      - id: detect-private-key        # primera barrera anti-secretos
+
+  # Escaneo de secretos: API keys de LLM, tokens, credenciales (skill: git-workflow / llm-security)
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+
+  # Limpia salidas de notebooks antes de commitear
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.8.1
+    hooks:
+      - id: nbstripout

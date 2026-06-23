@@ -1,0 +1,9 @@
+# Normaliza finales de línea: LF en el repo, conversión automática al checkout.
+* text=auto eol=lf
+
+# Binarios: sin conversión.
+*.png binary
+*.jpg binary
+*.pkl binary
+*.joblib binary
+*.gguf binary

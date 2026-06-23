@@ -1,0 +1,45 @@
+# Secretos y entorno
+.env
+.env.*
+!.env.example
+
+# Datos (se obtienen con scripts/download_data.py; nunca se commitea el CSV)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Modelos y artefactos entrenados
+*.pkl
+*.joblib
+*.gguf
+models/
+
+# Tracking de experimentos
+mlruns/
+
+# Resultados de evaluación (conservar solo la baseline)
+eval/results/*
+!eval/results/baseline.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Notebooks (limpiar salidas con nbstripout antes de commit)
+.ipynb_checkpoints/
+
+# IDE / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
