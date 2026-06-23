@@ -13,7 +13,7 @@ repos:
     rev: v1.13.0
     hooks:
       - id: mypy
-        additional_dependencies: [pydantic, pydantic-settings]
+        additional_dependencies: [pydantic, pydantic-settings, pandera, pandas-stubs, scikit-learn]
         args: [--ignore-missing-imports]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks

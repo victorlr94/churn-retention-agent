@@ -10,8 +10,11 @@ authors = [
 ]
 keywords = ["churn", "retention", "llm-agent", "ml", "telco"]
 dependencies = [
+    "pandas>=3.0.3",
+    "pandera>=0.32.0",
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
+    "scikit-learn>=1.9.0",
 ]
 
 [project.urls]
@@ -24,6 +27,7 @@ dev = [
     "ruff>=0.6",
     "mypy>=1.11",
     "pre-commit>=3.7",
+    "pandas-stubs>=3.0.3.260530",
 ]
 
 [build-system]
@@ -44,7 +48,12 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "N", "SIM"]
-ignore = []
+# N803/N806: X mayúscula es convención matemática estándar en ML (feature matrix).
+ignore = ["N803", "N806"]
+
+[tool.ruff.lint.per-file-ignores]
+# Scripts CLI: líneas largas en mensajes de usuario son aceptables.
+"scripts/*.py" = ["E501"]
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -60,10 +69,22 @@ disallow_untyped_defs = true
 module = "churn_agent.*"
 strict = true
 
+# pandera usa metaclases y runtime magic; sus internals no satisfacen strict
+[[tool.mypy.overrides]]
+module = "churn_agent.data.*"
+strict = false
+disallow_untyped_defs = true
+warn_return_any = true
+
 # Relajado en tests (pytest.mark.* son decoradores dinámicos, no tipables)
 [[tool.mypy.overrides]]
 module = "tests.*"
 disallow_untyped_decorators = false
+
+# sklearn no distribuye stubs ni py.typed
+[[tool.mypy.overrides]]
+module = "sklearn.*"
+ignore_missing_imports = true
 
 # Relajado en exploración
 [[tool.mypy.overrides]]
