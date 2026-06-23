@@ -17,7 +17,7 @@ from pandera.typing import Series
 # Constantes de columnas — evita strings sueltos en el resto del código
 # ---------------------------------------------------------------------------
 
-COL_CUSTOMER_ID = "Customer ID"
+COL_CUSTOMER_ID = "CustomerID"
 COL_CHURN_LABEL = "Churn Label"  # target categórico: "Yes" / "No"
 COL_CHURN_VALUE = "Churn Value"  # target numérico: 1 / 0
 COL_CLTV = "CLTV"  # Customer Lifetime Value (para economics)
@@ -61,7 +61,7 @@ class TelcoRawSchema(pa.DataFrameModel):
     """Contrato mínimo del CSV tal como lo devuelve Kaggle."""
 
     # Identificador
-    CustomerID: Series[str] = pa.Field(alias="Customer ID")
+    CustomerID: Series[str] = pa.Field(alias="CustomerID")
 
     # Target
     ChurnLabel: Series[str] = pa.Field(
@@ -75,11 +75,6 @@ class TelcoRawSchema(pa.DataFrameModel):
 
     # Económico (requerido para las tools de Fase 3)
     CLTV: Series[int] = pa.Field(alias="CLTV", ge=0)
-    SatisfactionScore: Series[int] = pa.Field(
-        alias="Satisfaction Score",
-        ge=1,
-        le=5,
-    )
 
     # Numéricas básicas
     TenureMonths: Series[int] = pa.Field(alias="Tenure Months", ge=0)
