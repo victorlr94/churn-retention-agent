@@ -14,7 +14,8 @@ data/processed/*
 *.pkl
 *.joblib
 *.gguf
-models/
+models/*
+!models/.gitkeep
 
 # Tracking de experimentos
 mlruns/
