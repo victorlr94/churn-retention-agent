@@ -8,6 +8,7 @@ data/raw/*
 data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!data/checksums.txt
 
 # Modelos y artefactos entrenados
 *.pkl
