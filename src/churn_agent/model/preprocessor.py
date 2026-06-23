@@ -7,13 +7,26 @@ e imputa valores faltantes antes de encodear.
 
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OrdinalEncoder, StandardScaler
+from sklearn.preprocessing import FunctionTransformer, OrdinalEncoder, StandardScaler
 
 HIGH_CARDINALITY_THRESHOLD = 50
+
+
+def _coerce_to_numeric(X: np.ndarray) -> np.ndarray:
+    """Convierte un array 2D con posibles strings a float64.
+
+    Necesario para columnas como 'Total Charges' en el dataset IBM Telco,
+    que llega como object dtype con ' ' (espacio) en clientes con tenure=0.
+    """
+    return np.asarray(
+        pd.DataFrame(X).apply(pd.to_numeric, errors="coerce"),
+        dtype=float,
+    )
 
 
 def _detect_columns(
@@ -49,6 +62,11 @@ def build_preprocessor(X: pd.DataFrame) -> ColumnTransformer:
 
     num_pipeline: Pipeline = Pipeline(
         [
+            # Coerce antes de imputar: maneja blancos string en columnas numéricas
+            (
+                "coerce",
+                FunctionTransformer(_coerce_to_numeric, feature_names_out="one-to-one"),
+            ),
             ("imputer", SimpleImputer(strategy="median")),
             ("scaler", StandardScaler()),
         ]

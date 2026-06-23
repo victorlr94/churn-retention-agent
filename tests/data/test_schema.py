@@ -27,11 +27,10 @@ from churn_agent.exceptions import LeakageError
 def _minimal_raw_df(**overrides: object) -> pd.DataFrame:
     """DataFrame sintético que cumple el esquema mínimo de TelcoRawSchema."""
     base: dict[str, list[object]] = {
-        "Customer ID": ["1", "2", "3"],
+        "CustomerID": ["1", "2", "3"],
         "Churn Label": ["Yes", "No", "No"],
         "Churn Value": [1, 0, 0],
         "CLTV": [3000, 5000, 4200],
-        "Satisfaction Score": [2, 4, 5],
         "Tenure Months": [1, 24, 36],
         "Monthly Charges": [70.5, 45.0, 89.9],
         # columna extra que no está en el schema mínimo (strict=False debe aceptarla)
@@ -118,7 +117,7 @@ def test_telco_raw_schema_rejects_negative_cltv() -> None:
 
 
 @pytest.mark.unit
-def test_telco_raw_schema_rejects_satisfaction_out_of_range() -> None:
-    df = _minimal_raw_df(**{"Satisfaction Score": [1, 6, 3]})
+def test_telco_raw_schema_rejects_negative_tenure() -> None:
+    df = _minimal_raw_df(**{"Tenure Months": [1, -1, 36]})
     with pytest.raises(pa.errors.SchemaErrors):
         TelcoRawSchema.validate(df, lazy=True)
