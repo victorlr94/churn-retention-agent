@@ -10,6 +10,23 @@ capas: ML clásico (propensión calibrada + drivers SHAP), economía de ofertas
 (EV = P·CLTV − costo), capa agéntica (LangGraph ReAct con HITL) y API REST
 para integraciones externas.
 
+## Demo en vivo
+
+> **[▶ Abrir demo en Hugging Face Spaces](https://huggingface.co/spaces/victorlr94/churn-retention-agent)**
+> _(disponible tras el deploy; sin API key, sin coste)_
+
+O localmente:
+
+```bash
+git clone https://github.com/victorlr94/churn-retention-agent
+cd churn-retention-agent
+uv sync --extra demo        # instala Streamlit (y el resto del entorno)
+uv run streamlit run app.py # abre http://localhost:8501
+```
+
+El modo demo usa un **LLM determinista** (sin ANTHROPIC\_API\_KEY) y datos de
+muestra commiteados — propensión, EV y compuerta HITL son **reales**.
+
 ## Problema que resuelve
 
 Las telcos pierden ingresos por churn. El error común es predecir el churn y
@@ -100,14 +117,25 @@ Salida esperada:
       Modelo: AUC-ROC=0.848  AUC-PR=0.649  Brier=0.135  lift@decil1=2.8x
 ```
 
-### 3. CLI del agente
+### 3. Demo interactiva (sin API key)
+
+```bash
+uv sync --extra demo
+uv run streamlit run app.py    # abre http://localhost:8501
+```
+
+La demo usa datos de muestra commiteados y un LLM falso determinista.
+Prueba un cliente normal, uno de alto valor (activa HITL) y un ID con
+`ignore` para ver el input guard en acción.
+
+### 4. CLI del agente
 
 ```bash
 # Requiere ANTHROPIC_API_KEY en .env
 uv run python scripts/run_agent.py --customer-id 3668-QPYBK --no-hitl
 ```
 
-### 4. API REST
+### 5. API REST
 
 ```bash
 # Copia .env.example a .env y añade ANTHROPIC_API_KEY
@@ -189,6 +217,7 @@ Detalle en [docs/DATA_CARD.md](docs/DATA_CARD.md).
 | 4. API | FastAPI REST + Swagger + tests | ✅ |
 | 5. Evaluación agente | Eval set + gate en CI | ✅ |
 | 6. Observabilidad | Tracing costo/latencia por sesión | ✅ |
+| 7. Demo interactiva | App Streamlit + modo offline + deploy HF Spaces | ✅ |
 
 ## Aprendizajes
 
@@ -225,6 +254,9 @@ Los tests corren en milisegundos y son completamente deterministas.
 | [ADR-0003](docs/architecture/adr/ADR-0003.md) | LightGBM sobre XGBoost/RF/CatBoost |
 | [ADR-0004](docs/architecture/adr/ADR-0004.md) | LangGraph sobre LCEL/CrewAI |
 | [ADR-0005](docs/architecture/adr/ADR-0005.md) | FastAPI sobre Flask/DRF |
+| [ADR-0006](docs/architecture/adr/ADR-0006.md) | Evaluación determinista del agente sin API key |
+| [ADR-0007](docs/architecture/adr/ADR-0007.md) | Observabilidad: log JSONL de sesiones |
+| [ADR-0008](docs/architecture/adr/ADR-0008.md) | Demo offline con StatefulFakeLLM y fixtures commiteadas |
 
 ## Licencia
 

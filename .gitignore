@@ -10,12 +10,19 @@ data/processed/*
 !data/processed/.gitkeep
 !data/checksums.txt
 
+# Demo fixtures (sample pequeño commiteado; ver ADR-0008)
+!data/sample/
+!data/sample/*
+
 # Modelos y artefactos entrenados
 *.pkl
 *.joblib
 *.gguf
 models/*
 !models/.gitkeep
+# Demo model (commiteado; ver ADR-0008)
+!models/demo/
+!models/demo/*.pkl
 
 # Tracking de experimentos
 mlruns/

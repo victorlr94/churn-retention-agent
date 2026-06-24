@@ -25,6 +25,9 @@ dependencies = [
     "uvicorn[standard]>=0.30",
 ]
 
+[project.optional-dependencies]
+demo = ["streamlit>=1.40"]
+
 [project.urls]
 Homepage = "https://github.com/victorlr/churn-retention-agent"
 
@@ -64,7 +67,9 @@ ignore = ["N803", "N806"]
 # Scripts CLI: líneas largas en mensajes de usuario son aceptables.
 "scripts/*.py" = ["E501"]
 # X mayúscula es convención matemática estándar para la matriz de features.
-"tests/**/*.py" = ["N802"]
+"tests/**/*.py" = ["N802", "E501"]
+# Streamlit: HTML inline y cadenas de markdown son inevitablemente largas.
+"src/churn_agent/demo/streamlit_app.py" = ["E501"]
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -170,6 +175,18 @@ module = "churn_agent.economics.*"
 strict = false
 disallow_untyped_defs = true
 warn_return_any = true
+
+[[tool.mypy.overrides]]
+module = "churn_agent.demo.*"
+strict = false
+disallow_untyped_defs = true
+disallow_untyped_decorators = false
+warn_return_any = true
+warn_unused_ignores = false
+
+[[tool.mypy.overrides]]
+module = "streamlit.*"
+ignore_missing_imports = true
 
 # ----------------------------------------------------------------------------
 # Testing (skill: testing-strategy)
