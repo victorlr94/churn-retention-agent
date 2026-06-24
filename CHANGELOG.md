@@ -5,6 +5,23 @@ el proyecto sigue [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-06-23
+
+### Added — Fase 7: Demo interactiva para reclutadores
+
+- `scripts/make_sample.py`: genera `data/sample/telco_sample.csv` (500 filas estratificadas) y `models/demo/lgbm_demo.pkl`; se ejecuta una vez en local y los artefactos se commitean.
+- `data/sample/telco_sample.csv` (121 KB): fixture de muestra commiteada; misma tasa de churn (~26.6%) que el dataset completo.
+- `models/demo/lgbm_demo.pkl` (769 KB): `LightGBMChurnModel` entrenado sobre el sample; commiteado con allowlist en `.gitignore`.
+- `src/churn_agent/demo/service.py`: `DemoService` con `analyze(customer_id)` y `approve(thread_id, approved)` en modo offline (StatefulFakeLLM + modelo demo). Propensión, EV y HITL son reales; solo el LLM es determinista.
+- `src/churn_agent/demo/streamlit_app.py`: UI de una pantalla — selector de cliente, métricas (propensión, CLTV, EV), factores de riesgo por desviación, tabla EV por tier, compuerta HITL (Aprobar/Rechazar), mensaje final.
+- `app.py` (raíz): shim para Hugging Face Spaces (SDK Streamlit).
+- `requirements.txt`: exportado con `uv export --extra demo --no-hashes`.
+- `Dockerfile`: imagen mínima para deploy alternativo en Render/Fly.
+- `src/churn_agent/config.py`: campos `demo_sample_path` y `demo_model_path`.
+- `pyproject.toml`: grupo opcional `demo = ["streamlit>=1.40"]`; overrides mypy para `churn_agent.demo.*`.
+- `docs/architecture/adr/ADR-0008.md`: decisión de modo offline + fixtures commiteadas.
+- 8 tests unitarios de demo (`tests/demo/test_demo_service.py`) sin API key, sin CSV real, sin pkl real. Total: 145 tests.
+
 ## [0.6.0] — 2026-06-23
 
 ### Added — Fase 6: Observabilidad
@@ -117,7 +134,8 @@ el proyecto sigue [SemVer](https://semver.org/lang/es/).
 - Secretos fuera del repo: `.gitignore` de `.env*`, `.env.example` sin valores,
   gitleaks y `detect-private-key` en pre-commit.
 
-[Unreleased]: https://github.com/victorlr94/churn-retention-agent/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/victorlr94/churn-retention-agent/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/victorlr94/churn-retention-agent/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/victorlr94/churn-retention-agent/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/victorlr94/churn-retention-agent/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/victorlr94/churn-retention-agent/compare/v0.3.0...v0.4.0

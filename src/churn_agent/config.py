@@ -50,6 +50,14 @@ class Settings(BaseSettings):
     # Observabilidad: ruta del log JSONL de sesiones (gitignoreado).
     session_log_path: Path = Field(default=PROJECT_ROOT / "logs" / "sessions.jsonl")
 
+    # Demo (Fase 7): fixtures commiteadas; no requieren descarga de Kaggle.
+    demo_sample_path: Path = Field(
+        default=PROJECT_ROOT / "data" / "sample" / "telco_sample.csv"
+    )
+    demo_model_path: Path = Field(
+        default=PROJECT_ROOT / "models" / "demo" / "lgbm_demo.pkl"
+    )
+
 
 def get_settings() -> Settings:
     """Devuelve la configuración del proyecto."""
