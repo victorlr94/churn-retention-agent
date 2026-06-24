@@ -47,6 +47,9 @@ class Settings(BaseSettings):
     # Human-in-the-loop: EV mínimo (MXN) para requerir aprobación humana.
     hitl_ev_threshold: float = Field(default=300.0)
 
+    # Observabilidad: ruta del log JSONL de sesiones (gitignoreado).
+    session_log_path: Path = Field(default=PROJECT_ROOT / "logs" / "sessions.jsonl")
+
 
 def get_settings() -> Settings:
     """Devuelve la configuración del proyecto."""

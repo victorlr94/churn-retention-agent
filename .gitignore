@@ -40,6 +40,10 @@ build/
 # Notebooks (limpiar salidas con nbstripout antes de commit)
 .ipynb_checkpoints/
 
+# Logs de observabilidad (sesiones del agente; gitignoreados)
+logs/*
+!logs/.gitkeep
+
 # IDE / SO
 .vscode/
 .idea/

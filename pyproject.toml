@@ -160,6 +160,12 @@ warn_return_any = true
 warn_unused_ignores = false
 
 [[tool.mypy.overrides]]
+module = "churn_agent.observability.*"
+strict = false
+disallow_untyped_defs = true
+warn_return_any = true
+
+[[tool.mypy.overrides]]
 module = "churn_agent.economics.*"
 strict = false
 disallow_untyped_defs = true

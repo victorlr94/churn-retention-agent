@@ -187,8 +187,8 @@ Detalle en [docs/DATA_CARD.md](docs/DATA_CARD.md).
 | 2. Modelo | Propensión calibrada + SHAP + baselines | ✅ |
 | 3. Agente | LangGraph ReAct + guardrails + HITL | ✅ |
 | 4. API | FastAPI REST + Swagger + tests | ✅ |
-| 5. Evaluación agente | Eval set + gate en CI | ⬜ (stretch) |
-| 6. Observabilidad | Tracing costo/latencia por sesión | ⬜ (stretch) |
+| 5. Evaluación agente | Eval set + gate en CI | ✅ |
+| 6. Observabilidad | Tracing costo/latencia por sesión | ✅ |
 
 ## Aprendizajes
 
