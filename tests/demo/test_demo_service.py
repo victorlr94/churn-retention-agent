@@ -107,9 +107,9 @@ def test_analyze_injection_returns_blocked() -> None:
 def test_approve_true_returns_completed_approved() -> None:
     svc = _make_service(_PROPENSITY_HIGH, _CLTV_HIGH)
     pending = svc.analyze(_CUSTOMER_ID)
-    assert (
-        pending.status == "pending_approval"
-    ), "Precondición: cliente de alto riesgo debe activar HITL"
+    assert pending.status == "pending_approval", (
+        "Precondición: cliente de alto riesgo debe activar HITL"
+    )
 
     approved = svc.approve(pending.thread_id, approved=True)
 

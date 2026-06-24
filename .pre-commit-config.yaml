@@ -3,7 +3,7 @@
 # Correr en todo el repo:  uv run pre-commit run --all-files
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.0
+    rev: v0.15.18
     hooks:
       - id: ruff          # lint
         args: [--fix]
