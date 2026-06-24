@@ -11,6 +11,9 @@ authors = [
 keywords = ["churn", "retention", "llm-agent", "ml", "telco"]
 dependencies = [
     "imbalanced-learn>=0.12",
+    "langchain-anthropic>=0.3",
+    "langchain-core>=0.3",
+    "langgraph>=0.2.57",
     "lightgbm>=4.5",
     "pandas>=3.0.3",
     "pandera>=0.32.0",
@@ -115,6 +118,34 @@ warn_return_any = true
 [[tool.mypy.overrides]]
 module = "notebooks.*"
 ignore_errors = true
+
+# langgraph y langchain no distribuyen stubs completos
+[[tool.mypy.overrides]]
+module = "langgraph.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "langchain_core.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "langchain_anthropic.*"
+ignore_missing_imports = true
+
+# agent y economics usan LangGraph/sklearn sin tipos completos
+[[tool.mypy.overrides]]
+module = "churn_agent.agent.*"
+strict = false
+disallow_untyped_defs = true
+disallow_untyped_decorators = false
+warn_return_any = true
+warn_unused_ignores = false
+
+[[tool.mypy.overrides]]
+module = "churn_agent.economics.*"
+strict = false
+disallow_untyped_defs = true
+warn_return_any = true
 
 # ----------------------------------------------------------------------------
 # Testing (skill: testing-strategy)
