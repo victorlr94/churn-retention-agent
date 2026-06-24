@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Raíz del proyecto: dos niveles arriba de este archivo (src/churn_agent/config.py).
@@ -31,6 +31,21 @@ class Settings(BaseSettings):
 
     # Reproducibilidad.
     random_seed: int = Field(default=42)
+
+    # Artefacto del modelo (gitignored; genera con scripts/train_model.py).
+    model_path: Path = Field(
+        default=PROJECT_ROOT / "models" / "lgbm_churn_calibrated.pkl"
+    )
+
+    # LLM — ANTHROPIC_API_KEY sin prefijo CHURN_ (convención estándar de Anthropic).
+    anthropic_api_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("ANTHROPIC_API_KEY", "CHURN_ANTHROPIC_API_KEY"),
+    )
+    llm_model: str = Field(default="claude-haiku-4-5-20251001")
+
+    # Human-in-the-loop: EV mínimo (MXN) para requerir aprobación humana.
+    hitl_ev_threshold: float = Field(default=300.0)
 
 
 def get_settings() -> Settings:
