@@ -10,6 +10,7 @@ authors = [
 ]
 keywords = ["churn", "retention", "llm-agent", "ml", "telco"]
 dependencies = [
+    "fastapi[standard]>=0.115",
     "imbalanced-learn>=0.12",
     "langchain-anthropic>=0.3",
     "langchain-core>=0.3",
@@ -21,6 +22,7 @@ dependencies = [
     "pydantic-settings>=2.3",
     "scikit-learn>=1.9.0",
     "shap>=0.46",
+    "uvicorn[standard]>=0.30",
 ]
 
 [project.urls]
@@ -34,6 +36,7 @@ dev = [
     "mypy>=1.11",
     "pre-commit>=3.7",
     "pandas-stubs>=3.0.3.260530",
+    "httpx>=0.27",
 ]
 
 [build-system]
@@ -132,7 +135,14 @@ ignore_missing_imports = true
 module = "langchain_anthropic.*"
 ignore_missing_imports = true
 
-# agent y economics usan LangGraph/sklearn sin tipos completos
+# api, agent y economics usan FastAPI/LangGraph/sklearn sin tipos completos
+[[tool.mypy.overrides]]
+module = "churn_agent.api.*"
+strict = false
+disallow_untyped_defs = true
+disallow_untyped_decorators = false
+warn_return_any = true
+
 [[tool.mypy.overrides]]
 module = "churn_agent.agent.*"
 strict = false
