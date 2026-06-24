@@ -43,3 +43,15 @@ class ApproveResponse(BaseModel):
     status: Literal["completed"] = "completed"
     approved: bool
     decision: AnalysisResult
+
+
+class MetricsResponse(BaseModel):
+    """Métricas agregadas de todas las sesiones del agente."""
+
+    total: int
+    avg_latency_ms: float
+    hitl_rate: float
+    block_rate: float
+    tier_distribution: dict[str, int]
+    total_cost_usd_est: float
+    avg_cost_usd_est: float

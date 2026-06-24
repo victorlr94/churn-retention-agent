@@ -5,6 +5,35 @@ el proyecto sigue [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-06-23
+
+### Added — Fase 6: Observabilidad
+
+- `src/churn_agent/observability/session_log.py`: `ObservabilityStore` JSONL append-only, `SessionRecord` y `SessionMetrics`; modo no-op cuando `log_path=None`.
+- `src/churn_agent/observability/cost.py`: `estimate_session_cost` — estimacion de tokens y coste USD basada en Claude Haiku 4.5 ($0.80/1M input, $4.00/1M output, ~4 chars/token).
+- `src/churn_agent/api/routes/metrics.py`: `GET /api/v1/metrics` — metricas agregadas de sesiones (latencia media, tasa HITL, tasa bloqueados, distribucion de tiers, coste estimado).
+- `src/churn_agent/api/dependencies.py`: `get_observability_store` — devuelve no-op si el store no esta inicializado (evita cambios en tests existentes).
+- `src/churn_agent/api/routes/agent.py`: instrumentacion en `analyze_customer` y `approve_session` — mide latencia con `time.monotonic()`, estima coste y registra `SessionRecord`.
+- `src/churn_agent/api/app.py`: inicializa `ObservabilityStore` en el lifespan y lo expone en `app.state`.
+- `src/churn_agent/config.py`: campo `session_log_path` (default: `logs/sessions.jsonl`).
+- `scripts/show_sessions.py`: CLI `--last N`, `--summary`, `--log PATH` para inspeccionar el log de sesiones desde la terminal.
+- `docs/architecture/adr/ADR-0007.md`: decision de JSONL sobre OTEL/SQLite/LangSmith.
+- `.gitignore`: `logs/*` + `!logs/.gitkeep` para gitignorear el log de sesiones.
+- 15 tests unitarios de observabilidad (no-op store, escritura/lectura, metricas, `build_session_record`, `estimate_session_cost`). Total: 137 tests.
+
+## [0.5.0] — 2026-06-23
+
+### Added — Fase 5: Evaluacion determinista del agente
+
+- `src/churn_agent/evaluation/cases.py`: `EvalCase` (frozen dataclass) y `EVAL_SUITE` con 5 casos cubriendo las 4 rutas del grafo (baja propension, sin HITL, con HITL aprobado, bloqueado por seguridad, rechazo humano).
+- `src/churn_agent/evaluation/fake_components.py`: `FakeChurnModel` (implementa `ChurnModel` Protocol) y `StatefulFakeLLM` (extiende `BaseChatModel`; simula la secuencia query_propensity → select_best_offer → mensaje final sin red ni API key).
+- `src/churn_agent/evaluation/metrics.py`: `EvalMetrics`, `compute_metrics` y `gate_passes` con umbrales: `pass_rate >= 0.80`, `tier_accuracy >= 0.80`, `hitl_recall = 1.00`, `block_rate = 1.00`.
+- `src/churn_agent/evaluation/runner.py`: `run_eval_case` y `run_eval_suite` — ejecutan cada caso contra el grafo real con componentes falsos; `EvalResult` recoge el veredicto por caso.
+- `scripts/evaluate_agent.py`: CLI `--exit-code` — sale con codigo 1 si el gate falla; integrado en CI.
+- `.github/workflows/ci.yml`: paso `uv run python scripts/evaluate_agent.py --exit-code` que bloquea el merge si las metricas caen por debajo del umbral.
+- `docs/architecture/adr/ADR-0006.md`: decision de evaluacion determinista (sin pkl, sin CSV, sin API key).
+- 24 tests unitarios (11 de metricas, 13 de runner). Total: 122 tests.
+
 ## [0.4.0] — 2026-06-23
 
 ### Added — Fase 4: API REST
@@ -88,7 +117,9 @@ el proyecto sigue [SemVer](https://semver.org/lang/es/).
 - Secretos fuera del repo: `.gitignore` de `.env*`, `.env.example` sin valores,
   gitleaks y `detect-private-key` en pre-commit.
 
-[Unreleased]: https://github.com/victorlr94/churn-retention-agent/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/victorlr94/churn-retention-agent/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/victorlr94/churn-retention-agent/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/victorlr94/churn-retention-agent/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/victorlr94/churn-retention-agent/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/victorlr94/churn-retention-agent/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/victorlr94/churn-retention-agent/compare/v0.1.0...v0.2.0
