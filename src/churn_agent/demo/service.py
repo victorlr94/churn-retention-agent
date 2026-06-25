@@ -107,6 +107,7 @@ class DemoService:
         cols_to_drop = EXCLUDED_FROM_FEATURES & set(data.columns)
         feature_cols = [c for c in data.columns if c not in cols_to_drop]
 
+        self._churn_model: LightGBMChurnModel = churn_model
         self._compiled = build_graph(
             model=churn_model,
             data=data,
@@ -232,6 +233,25 @@ class DemoService:
             {"feature": f, "value": v, "deviation": d, "direction": dr}
             for f, v, d, dr in results[:n]
         ]
+
+    def customer_propensity(self, customer_id: str) -> tuple[float, int] | None:
+        """Propensión y CLTV sin ejecutar el grafo completo.
+
+        Permite mostrar los datos de análisis en la UI antes de que el
+        usuario decida si ejecutar el agente.
+        """
+        matches = self._data[self._data[COL_CUSTOMER_ID] == customer_id]
+        if matches.empty:
+            return None
+        row = matches.iloc[0]
+        features: dict[str, object] = {
+            col: row[col] for col in self._feature_cols if col in row.index
+        }
+        propensity = self._churn_model.predict_proba(features)
+        raw_cltv: Any = row.get(COL_CLTV, 2000)
+        cltv_val = pd.to_numeric(raw_cltv, errors="coerce")  # type: ignore[arg-type]
+        cltv = int(cltv_val) if not pd.isna(cltv_val) else 2000
+        return propensity, cltv
 
     def approve(self, thread_id: str, *, approved: bool) -> DemoResult:
         """Reanuda el grafo suspendido tras la decisión humana."""
