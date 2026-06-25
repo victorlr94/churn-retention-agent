@@ -39,7 +39,7 @@ def _print_decision(decision: RetentionDecision) -> None:
         return
 
     if decision.propensity is not None:
-        print(f"  Propensidad de churn : {decision.propensity * 100:.1f}%")
+        print(f"  Propensión de churn  : {decision.propensity * 100:.1f}%")
     if decision.cltv is not None:
         print(f"  CLTV                 : ${decision.cltv:,} MXN")
     if decision.ev is not None:
