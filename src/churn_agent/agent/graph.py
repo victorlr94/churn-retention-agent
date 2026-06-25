@@ -44,15 +44,15 @@ Tu tarea: analizar el riesgo de churn de un cliente y recomendar la oferta ópti
 
 Flujo obligatorio:
 1. Llama a `query_propensity` con el customer_id.
-2. Llama a `select_best_offer` con la propensidad y el CLTV obtenidos.
+2. Llama a `select_best_offer` con la propensión y el CLTV obtenidos.
 3. Redacta un resumen conciso (3-5 líneas) con:
-   - Propensidad de churn (en %)
+   - Propensión de churn (en %)
    - Valor del cliente (CLTV en MXN)
    - Top drivers de riesgo
    - Oferta recomendada y justificación económica (EV)
 
 Sé directo y profesional. Usa el formato:
-PROPENSIDAD: X%
+PROPENSIÓN: X%
 CLTV: $X,XXX MXN
 DRIVERS: <lista>
 OFERTA: <tier> — <descripción> (EV estimado: $X MXN)
