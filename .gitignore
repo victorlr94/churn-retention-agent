@@ -51,6 +51,9 @@ build/
 logs/*
 !logs/.gitkeep
 
+# Logs de Streamlit (generados localmente por streamlit run)
+streamlit*.log
+
 # IDE / SO
 .vscode/
 .idea/
