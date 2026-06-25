@@ -8,12 +8,21 @@ data/raw/*
 data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!data/checksums.txt
+
+# Demo fixtures (sample pequeño commiteado; ver ADR-0008)
+!data/sample/
+!data/sample/*
 
 # Modelos y artefactos entrenados
 *.pkl
 *.joblib
 *.gguf
-models/
+models/*
+!models/.gitkeep
+# Demo model (commiteado; ver ADR-0008)
+!models/demo/
+!models/demo/*.pkl
 
 # Tracking de experimentos
 mlruns/
@@ -37,6 +46,13 @@ build/
 
 # Notebooks (limpiar salidas con nbstripout antes de commit)
 .ipynb_checkpoints/
+
+# Logs de observabilidad (sesiones del agente; gitignoreados)
+logs/*
+!logs/.gitkeep
+
+# Logs sueltos (p. ej. salidas de Streamlit en local)
+*.log
 
 # IDE / SO
 .vscode/

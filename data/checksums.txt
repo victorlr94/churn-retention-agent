@@ -1,0 +1,4 @@
+# SHA-256 checksums de los archivos de data/raw/
+# Formato: filename: sha256hash
+
+telco_customer_churn.csv: b499f014f8bdda7eb7676c36255761ac11bbb0bdd556ba71276403142df1a873

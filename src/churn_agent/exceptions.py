@@ -29,3 +29,7 @@ class EconomicsError(ChurnAgentError):
 
 class GuardrailError(ChurnAgentError):
     """Una salida del agente violó un guardrail (p. ej. oferta fuera de catálogo)."""
+
+
+class SecurityError(ChurnAgentError):
+    """Se detectó un intento de prompt injection o entrada maliciosa."""
