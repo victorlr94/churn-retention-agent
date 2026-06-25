@@ -1,3 +1,14 @@
+---
+title: Churn Retention Agent
+emoji: 📊
+colorFrom: blue
+colorTo: indigo
+sdk: streamlit
+sdk_version: "1.41.0"
+app_file: app.py
+pinned: false
+---
+
 # Churn Retention Agent
 
 > Agente de retención anti-churn con **human-in-the-loop**: un modelo de
