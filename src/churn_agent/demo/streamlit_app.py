@@ -184,11 +184,25 @@ def main() -> None:
             drivers = service.risk_drivers(customer_id, n=5)
             if drivers:
                 df = pd.DataFrame(drivers)
-                st.bar_chart(
-                    df.set_index("feature")["deviation"],
-                    height=175,
-                    use_container_width=True,
-                )
+                sub_chart, sub_vals = st.columns([3, 2])
+                with sub_chart:
+                    st.bar_chart(
+                        df.set_index("feature")["deviation"],
+                        height=175,
+                        use_container_width=True,
+                    )
+                with sub_vals:
+                    st.caption("Valor real del cliente")
+                    for row in drivers:
+                        val = row["value"]
+                        direction = str(row.get("direction", ""))
+                        dir_icon = "↑" if "↑" in direction else "↓"
+                        val_str = f"{val:.0f}" if val == int(val) else f"{val:.2f}"
+                        st.markdown(
+                            f"<small><b>{row['feature']}</b><br>"
+                            f"{val_str} &nbsp;{dir_icon}</small>",
+                            unsafe_allow_html=True,
+                        )
             else:
                 st.caption("Sin variables numéricas suficientes para este cliente.")
 
