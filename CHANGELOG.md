@@ -5,6 +5,20 @@ el proyecto sigue [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added
+
+- `docs/index.html`: página de presentación del proyecto para reclutadores — propósito, arquitectura, stack, métricas del modelo, guardrails y aprendizajes, en una sola página autocontenida (sin dependencias externas).
+- `docs/screenshots/demo-overview.png`: captura de la demo Streamlit embebida en el README.
+
+### Changed
+
+- `src/churn_agent/demo/streamlit_app.py`: layout de la demo reorganizado en **tres columnas** (ofertas disponibles · factores de riesgo · valores reales); los valores reales se dividen en **dos sub-columnas** para mejor aprovechamiento del espacio.
+- `README.md`: sección **Demo en vivo** con el screenshot embebido y descripción de la pantalla.
+
+### Fixed
+
+- Typo «Propensidad» → «Propensión» en el prompt del agente (`agent/graph.py`) y en la CLI (`scripts/run_agent.py`).
+
 ## [0.7.0] — 2026-06-23
 
 ### Added — Fase 7: Demo interactiva para reclutadores

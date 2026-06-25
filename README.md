@@ -13,7 +13,16 @@ para integraciones externas.
 ## Demo en vivo
 
 > **[▶ Abrir demo en Hugging Face Spaces](https://huggingface.co/spaces/victorlr94/churn-retention-agent)**
-> _(disponible tras el deploy; sin API key, sin coste)_
+> _(sin API key, sin coste)_
+
+![Demo del Agente de Retención Anti-Churn](docs/screenshots/demo-overview.png)
+
+La pantalla resume en tres columnas lo que normalmente vive en tres equipos
+distintos: **ofertas disponibles** con su EV calculado, **factores de riesgo**
+(desviación de cada variable vs. la mediana de la población) y los **valores
+reales** del cliente. Arriba, las métricas inmediatas (propensión, CLTV, mejor
+EV); abajo, la **compuerta humana (HITL)** que pide aprobación explícita cuando
+el EV supera el umbral.
 
 O localmente:
 

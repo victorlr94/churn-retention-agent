@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Churn Retention Agent — sistema agéntico de retención anti-churn con propensión calibrada, razonamiento económico (EV) y human-in-the-loop sobre LangGraph." />
+<meta name="author" content="Víctor LR" />
+<meta property="og:title" content="Churn Retention Agent" />
+<meta property="og:description" content="Agente de retención anti-churn con human-in-the-loop: ML calibrado + economía de ofertas + LangGraph + API REST." />
+<meta property="og:type" content="website" />
+<title>Churn Retention Agent · Sistema agéntico de retención</title>
+<style>
+  :root {
+    --bg: #0e1117;
+    --bg-2: #161b22;
+    --bg-3: #1c2230;
+    --border: #2a3140;
+    --text: #e6edf3;
+    --muted: #9aa6b2;
+    --accent: #ff4b4b;
+    --accent-2: #4b9fff;
+    --green: #2ecc71;
+    --amber: #f6b73c;
+    --radius: 14px;
+    --maxw: 1080px;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  a { color: var(--accent-2); text-decoration: none; transition: color .15s ease; }
+  a:hover { color: #82c0ff; }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+  /* ── Nav ───────────────────────────────────────────── */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(14, 17, 23, .82);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .wrap {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .brand { font-weight: 700; font-size: 1.02rem; letter-spacing: -.01em; display: flex; align-items: center; gap: 8px; }
+  .brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+  .nav-links { display: flex; gap: 26px; align-items: center; }
+  .nav-links a { color: var(--muted); font-size: .9rem; font-weight: 500; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--accent); color: #fff !important;
+    padding: 8px 16px; border-radius: 8px; font-size: .85rem; font-weight: 600;
+  }
+  .nav-cta:hover { background: #ff6363; }
+  @media (max-width: 760px) { .nav-links a:not(.nav-cta) { display: none; } }
+
+  /* ── Hero ──────────────────────────────────────────── */
+  .hero {
+    position: relative;
+    padding: 88px 0 64px;
+    text-align: center;
+    background:
+      radial-gradient(900px 380px at 50% -8%, rgba(255,75,75,.16), transparent 70%),
+      radial-gradient(700px 320px at 85% 10%, rgba(75,159,255,.10), transparent 70%);
+  }
+  .badge {
+    display: inline-block; font-size: .78rem; font-weight: 600;
+    color: var(--accent); background: rgba(255,75,75,.10);
+    border: 1px solid rgba(255,75,75,.30);
+    padding: 5px 14px; border-radius: 999px; margin-bottom: 22px;
+    letter-spacing: .02em;
+  }
+  .hero h1 {
+    font-size: clamp(2.1rem, 5.2vw, 3.5rem);
+    line-height: 1.08; letter-spacing: -.025em; font-weight: 800;
+    background: linear-gradient(180deg, #fff 30%, #b9c4d0);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin-bottom: 18px;
+  }
+  .hero p.lead {
+    font-size: clamp(1.02rem, 2.3vw, 1.22rem);
+    color: var(--muted); max-width: 720px; margin: 0 auto 14px;
+  }
+  .hero .sub {
+    font-size: .96rem; color: var(--muted); max-width: 680px; margin: 0 auto 32px; opacity: .85;
+  }
+  .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 12px 22px; border-radius: 10px; font-weight: 600; font-size: .96rem;
+    border: 1px solid transparent; cursor: pointer; transition: all .16s ease;
+  }
+  .btn-primary { background: var(--accent); color: #fff !important; }
+  .btn-primary:hover { background: #ff6363; transform: translateY(-1px); }
+  .btn-ghost { background: var(--bg-2); color: var(--text) !important; border-color: var(--border); }
+  .btn-ghost:hover { border-color: #44506a; background: var(--bg-3); }
+
+  /* ── Stats bar ─────────────────────────────────────── */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    margin: 56px 0 0;
+  }
+  .stat {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 22px 18px; text-align: center;
+  }
+  .stat .num {
+    font-size: 1.85rem; font-weight: 800; letter-spacing: -.02em;
+    background: linear-gradient(180deg, #fff, #aeb9c6);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .stat .lbl { font-size: .8rem; color: var(--muted); margin-top: 4px; }
+  @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+  /* ── Sections ──────────────────────────────────────── */
+  section { padding: 72px 0; border-top: 1px solid var(--border); }
+  section.no-border { border-top: none; }
+  .eyebrow { color: var(--accent); font-weight: 700; font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
+  h2 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 800; letter-spacing: -.02em; margin-bottom: 14px; }
+  .section-intro { color: var(--muted); max-width: 720px; font-size: 1.03rem; margin-bottom: 38px; }
+
+  /* ── Problem / two-col ─────────────────────────────── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  @media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 26px;
+  }
+  .panel h3 { font-size: 1.08rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+  .panel.bad h3 { color: #ff8585; }
+  .panel.good h3 { color: var(--green); }
+  .panel p { color: var(--muted); font-size: .96rem; }
+  .panel .tag { font-size: 1.3rem; }
+
+  /* ── Pipeline / architecture ───────────────────────── */
+  .pipeline {
+    display: flex; align-items: stretch; gap: 0; flex-wrap: wrap;
+    counter-reset: step;
+  }
+  .stage {
+    flex: 1 1 180px; position: relative;
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 22px 20px; margin: 8px;
+  }
+  .stage .k { font-family: var(--mono); font-size: .74rem; color: var(--accent); font-weight: 700; letter-spacing: .04em; }
+  .stage h4 { font-size: 1.02rem; margin: 6px 0 8px; }
+  .stage p { font-size: .88rem; color: var(--muted); }
+  .stage .stack-tag {
+    display: inline-block; margin-top: 12px; font-family: var(--mono); font-size: .72rem;
+    color: var(--muted); background: var(--bg-3); border: 1px solid var(--border);
+    padding: 3px 9px; border-radius: 6px;
+  }
+  .hitl-callout {
+    margin-top: 26px; display: flex; gap: 14px; align-items: flex-start;
+    background: linear-gradient(180deg, rgba(246,183,60,.08), rgba(246,183,60,.02));
+    border: 1px solid rgba(246,183,60,.30); border-radius: var(--radius); padding: 20px 22px;
+  }
+  .hitl-callout .ic { font-size: 1.4rem; line-height: 1; }
+  .hitl-callout strong { color: var(--amber); }
+  .hitl-callout p { color: var(--muted); font-size: .95rem; }
+
+  /* ── Demo image ────────────────────────────────────── */
+  .shot {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; background: var(--bg-2);
+    box-shadow: 0 24px 60px rgba(0,0,0,.45);
+  }
+  .shot img { display: block; width: 100%; height: auto; }
+  .shot-cap { font-size: .85rem; color: var(--muted); text-align: center; margin-top: 14px; }
+
+  /* ── Stack grid ────────────────────────────────────── */
+  .grid-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 860px) { .grid-cards { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 540px) { .grid-cards { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; transition: border-color .16s ease, transform .16s ease;
+  }
+  .card:hover { border-color: #44506a; transform: translateY(-2px); }
+  .card .cap { font-family: var(--mono); font-size: .72rem; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+  .card h4 { font-size: 1.02rem; margin: 7px 0 6px; }
+  .card p { font-size: .88rem; color: var(--muted); }
+
+  /* ── Metrics table ─────────────────────────────────── */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+  table { width: 100%; border-collapse: collapse; font-size: .92rem; min-width: 520px; }
+  th, td { text-align: left; padding: 13px 18px; border-bottom: 1px solid var(--border); }
+  thead th { background: var(--bg-3); color: var(--muted); font-weight: 600; font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.best td { background: rgba(46,204,113,.07); }
+  tbody tr.best td:first-child { color: var(--green); font-weight: 700; }
+  td.num { font-family: var(--mono); }
+  .metric-note { font-size: .88rem; color: var(--muted); margin-top: 16px; }
+
+  /* ── Guardrails ────────────────────────────────────── */
+  .rail-list { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 760px) { .rail-list { grid-template-columns: 1fr; } }
+  .rail {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 18px;
+  }
+  .rail .ic { font-size: 1.2rem; line-height: 1.4; }
+  .rail h4 { font-size: .95rem; margin-bottom: 2px; }
+  .rail p { font-size: .85rem; color: var(--muted); }
+
+  /* ── Learnings ─────────────────────────────────────── */
+  .learn { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 760px) { .learn { grid-template-columns: 1fr; } }
+  .learn-card {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-left: 3px solid var(--accent); border-radius: 12px; padding: 22px;
+  }
+  .learn-card h4 { font-size: 1rem; margin-bottom: 8px; }
+  .learn-card p { font-size: .9rem; color: var(--muted); }
+
+  /* ── Roadmap ───────────────────────────────────────── */
+  .timeline { display: grid; gap: 0; }
+  .tl {
+    display: grid; grid-template-columns: 44px 1fr; gap: 18px;
+    padding-bottom: 22px; position: relative;
+  }
+  .tl:not(:last-child)::before {
+    content: ""; position: absolute; left: 21px; top: 30px; bottom: -4px;
+    width: 2px; background: var(--border);
+  }
+  .tl .pill {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(46,204,113,.12); border: 1px solid rgba(46,204,113,.4);
+    color: var(--green); font-size: 1.1rem; z-index: 1;
+  }
+  .tl h4 { font-size: 1rem; margin-bottom: 2px; }
+  .tl p { font-size: .88rem; color: var(--muted); }
+
+  /* ── Limitations ───────────────────────────────────── */
+  .lim { columns: 2; column-gap: 28px; }
+  @media (max-width: 760px) { .lim { columns: 1; } }
+  .lim li {
+    break-inside: avoid; list-style: none; padding: 10px 0 10px 26px; position: relative;
+    color: var(--muted); font-size: .92rem;
+  }
+  .lim li::before { content: "▹"; position: absolute; left: 0; color: var(--amber); }
+  .lim li b { color: var(--text); }
+
+  /* ── Final CTA + footer ────────────────────────────── */
+  .final {
+    text-align: center;
+    background: radial-gradient(700px 300px at 50% 120%, rgba(255,75,75,.14), transparent 70%);
+  }
+  footer { border-top: 1px solid var(--border); padding: 34px 0; }
+  footer .wrap { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; }
+  footer .muted { color: var(--muted); font-size: .86rem; }
+  footer .flinks { display: flex; gap: 22px; font-size: .9rem; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <span class="brand"><span class="dot"></span> Churn Retention Agent</span>
+    <div class="nav-links">
+      <a href="#problema">Problema</a>
+      <a href="#arquitectura">Arquitectura</a>
+      <a href="#stack">Stack</a>
+      <a href="#metricas">Métricas</a>
+      <a href="https://huggingface.co/spaces/victorlr94/churn-retention-agent" class="nav-cta" target="_blank" rel="noopener">Probar demo</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="badge">Sistema agéntico · ML + LLM + Human-in-the-loop</span>
+    <h1>Retención anti-churn que decide<br />por valor económico, no a ciegas</h1>
+    <p class="lead">
+      Un modelo de propensión <b>calibrado</b> alimenta a un agente LLM que razona sobre
+      el cliente, calcula el <b>valor económico esperado</b> de la mejor oferta y deja la
+      ejecución final bajo una <b>compuerta humana</b>.
+    </p>
+    <p class="sub">
+      No es "otro modelo de churn" ni un chatbot. Es un sistema de cuatro capas:
+      ML clásico, economía de ofertas, capa agéntica (LangGraph) y API REST.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://huggingface.co/spaces/victorlr94/churn-retention-agent" target="_blank" rel="noopener">▶ Demo en vivo (sin API key)</a>
+      <a class="btn btn-ghost" href="https://github.com/victorlr94/churn-retention-agent" target="_blank" rel="noopener">★ Ver código en GitHub</a>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="num">0.848</div><div class="lbl">AUC-ROC en test</div></div>
+      <div class="stat"><div class="num">2.8×</div><div class="lbl">Lift en decil de mayor riesgo</div></div>
+      <div class="stat"><div class="num">145</div><div class="lbl">Tests automatizados</div></div>
+      <div class="stat"><div class="num">8</div><div class="lbl">ADRs documentados</div></div>
+    </div>
+  </div>
+</header>
+
+<section id="problema">
+  <div class="wrap">
+    <div class="eyebrow">El problema</div>
+    <h2>Predecir el churn no basta</h2>
+    <p class="section-intro">
+      Las telcos pierden ingresos por churn. El error común es predecir quién se irá y
+      disparar descuentos a ciegas — se gasta retención en clientes que no la necesitan
+      o que no valen lo que cuesta retenerlos.
+    </p>
+    <div class="two-col">
+      <div class="panel bad">
+        <h3><span class="tag">⚠️</span> El enfoque ingenuo</h3>
+        <p>Entrenas un clasificador, ordenas por probabilidad de churn y mandas un
+        descuento a los de arriba. Ignora el valor del cliente, el coste de la oferta
+        y la probabilidad de que la oferta realmente lo retenga.</p>
+      </div>
+      <div class="panel good">
+        <h3><span class="tag">✓</span> El enfoque de este proyecto</h3>
+        <p>Se prioriza por <b>valor económico esperado</b>
+        (EV = P&nbsp;·&nbsp;uplift&nbsp;·&nbsp;CLTV&nbsp;−&nbsp;costo) y un humano aprueba
+        la acción en clientes de alto valor — supervisión humana en decisiones de
+        alto impacto.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="arquitectura">
+  <div class="wrap">
+    <div class="eyebrow">Cómo funciona</div>
+    <h2>Cuatro capas, una decisión</h2>
+    <p class="section-intro">
+      Cada capa hace una cosa y la hace bien. El dato fluye de izquierda a derecha;
+      la última palabra es de un humano cuando hay dinero en juego.
+    </p>
+    <div class="pipeline">
+      <div class="stage">
+        <div class="k">01 · ML</div>
+        <h4>Propensión calibrada</h4>
+        <p>LightGBM + calibración isotónica. Devuelve una probabilidad <i>real</i> en [0,1], no un score. SHAP explica los drivers.</p>
+        <span class="stack-tag">LightGBM · SHAP</span>
+      </div>
+      <div class="stage">
+        <div class="k">02 · Economía</div>
+        <h4>Valor esperado</h4>
+        <p>EV = P · uplift · CLTV − costo, por cada tier del catálogo (LIGHT / STANDARD / PREMIUM). Se elige el de mayor EV.</p>
+        <span class="stack-tag">economics/ev.py</span>
+      </div>
+      <div class="stage">
+        <div class="k">03 · Agente</div>
+        <h4>Razonamiento ReAct</h4>
+        <p>Grafo LangGraph: el LLM llama tools de solo lectura, observa y redacta la recomendación con su justificación económica.</p>
+        <span class="stack-tag">LangGraph · Claude</span>
+      </div>
+      <div class="stage">
+        <div class="k">04 · API</div>
+        <h4>Integración REST</h4>
+        <p>FastAPI con Swagger autogenerado. HITL en dos pasos: <code>analyze</code> → <code>approve</code>, listo para un CRM.</p>
+        <span class="stack-tag">FastAPI</span>
+      </div>
+    </div>
+    <div class="hitl-callout">
+      <span class="ic">🟡</span>
+      <p><strong>Compuerta humana (HITL).</strong> Cuando el EV supera el umbral
+      (300&nbsp;MXN por defecto), el grafo se <b>suspende</b> con el <code>interrupt()</code>
+      nativo de LangGraph y cede el control a un operador para aprobar o rechazar.
+      El disparo depende del EV calculado por el modelo y la economía — no de lo que
+      "decida" el LLM.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Pruébalo</div>
+    <h2>La demo, en una pantalla</h2>
+    <p class="section-intro">
+      Eliges un cliente y ves al instante propensión, CLTV, EV por oferta, los factores
+      de riesgo y la compuerta HITL. Corre con un <b>LLM determinista</b> sobre datos de
+      muestra: sin API key y sin coste, pero la propensión, el EV y el HITL son
+      <b>reales</b>.
+    </p>
+    <figure class="shot">
+      <img src="screenshots/demo-overview.png" alt="Captura de la demo: métricas de propensión, CLTV y EV; tres columnas con ofertas disponibles, factores de riesgo y valores reales; y la compuerta de aprobación humana." />
+    </figure>
+    <p class="shot-cap">Demo interactiva desplegada en Hugging Face Spaces · layout en tres columnas + compuerta HITL.</p>
+  </div>
+</section>
+
+<section id="stack">
+  <div class="wrap">
+    <div class="eyebrow">Stack tecnológico</div>
+    <h2>Herramientas con criterio</h2>
+    <p class="section-intro">Cada elección está documentada en un ADR — qué se eligió y qué se descartó.</p>
+    <div class="grid-cards">
+      <div class="card"><div class="cap">Entorno</div><h4>uv</h4><p>Gestión de dependencias y lockfile reproducible; Python instalado automáticamente.</p></div>
+      <div class="card"><div class="cap">Calidad</div><h4>Ruff · mypy · pre-commit</h4><p>Formato, lint, tipos estrictos en el núcleo y hooks antes de cada commit.</p></div>
+      <div class="card"><div class="cap">Modelo</div><h4>LightGBM · Isotonic · SHAP</h4><p>Propensión calibrada y drivers explicables por cliente.</p></div>
+      <div class="card"><div class="cap">Agente</div><h4>LangGraph · Claude</h4><p>Loop ReAct con <code>interrupt()</code> nativo para el human-in-the-loop.</p></div>
+      <div class="card"><div class="cap">API</div><h4>FastAPI · uvicorn</h4><p>REST con Swagger autogenerado y flujo HITL en dos pasos.</p></div>
+      <div class="card"><div class="cap">Datos</div><h4>pandera</h4><p>Validación de esquema y guardia explícita contra leakage.</p></div>
+      <div class="card"><div class="cap">Seguridad</div><h4>gitleaks · guards</h4><p>Escaneo de secretos + regex anti prompt-injection antes del LLM.</p></div>
+      <div class="card"><div class="cap">Demo</div><h4>Streamlit</h4><p>UI offline determinista desplegada en Hugging Face Spaces.</p></div>
+      <div class="card"><div class="cap">CI</div><h4>GitHub Actions</h4><p>Lint + tipos + tests + gate de evaluación del agente en cada PR.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="metricas">
+  <div class="wrap">
+    <div class="eyebrow">Evaluación del modelo</div>
+    <h2>Números honestos</h2>
+    <p class="section-intro">
+      Test set de 1&nbsp;409 clientes (churn rate 26.5&nbsp;%). No se reporta accuracy:
+      con clases desbalanceadas es engañosa.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Modelo</th><th>AUC-ROC</th><th>AUC-PR</th><th>Brier</th><th>lift@decil1</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Mayoría (baseline)</td><td class="num">0.500</td><td class="num">0.265</td><td class="num">0.195</td><td class="num">1.0×</td></tr>
+          <tr><td>Logística (baseline)</td><td class="num">~0.810</td><td class="num">~0.580</td><td class="num">~0.155</td><td class="num">~2.2×</td></tr>
+          <tr class="best"><td>LightGBM calibrado</td><td class="num">~0.848</td><td class="num">~0.649</td><td class="num">~0.135</td><td class="num">~2.8×</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="metric-note">
+      El 10&nbsp;% de clientes que el modelo marca como más propensos contiene <b>~2.8× más
+      churners reales</b> que el promedio. La calibración isotónica garantiza que la
+      probabilidad sea utilizable directamente en la fórmula de EV, sin reescalar.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Guardrails y seguridad</div>
+    <h2>Diseñado para no romperse en silencio</h2>
+    <p class="section-intro">Cada riesgo del pipeline tiene una mitigación explícita y testeada.</p>
+    <div class="rail-list">
+      <div class="rail"><span class="ic">🔑</span><div><h4>Secretos fuera del repo</h4><p><code>.env</code> gitignored, <code>.env.example</code> sin valores, gitleaks en pre-commit y CI.</p></div></div>
+      <div class="rail"><span class="ic">🚫</span><div><h4>Anti-leakage</h4><p><code>LeakageError</code> si <code>Churn Score / Reason / Category</code> intentan entrar como features.</p></div></div>
+      <div class="rail"><span class="ic">🛡️</span><div><h4>Prompt injection</h4><p>11 patrones regex en el <code>input_guard</code> antes de llamar al LLM.</p></div></div>
+      <div class="rail"><span class="ic">✅</span><div><h4>Validación de salida</h4><p><code>check_output_offer</code> verifica que el tier pertenezca al catálogo.</p></div></div>
+      <div class="rail"><span class="ic">🙋</span><div><h4>Human-in-the-loop</h4><p><code>interrupt()</code> de LangGraph cuando el EV supera el umbral configurable.</p></div></div>
+      <div class="rail"><span class="ic">🔒</span><div><h4>Acciones irreversibles</h4><p>Las tools son de solo lectura; el agente nunca ejecuta acciones externas.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Aprendizajes</div>
+    <h2>Decisiones difíciles y trade-offs</h2>
+    <p class="section-intro">Lo que importa de un proyecto no es solo qué se construyó, sino cómo se decidió.</p>
+    <div class="learn">
+      <div class="learn-card">
+        <h4>El leakage es el descalificador silencioso</h4>
+        <p><code>Churn Score</code> y <code>Churn Reason</code> derivan del propio churn; usarlos arruina la credibilidad aunque las métricas se vean perfectas. Una guardia explícita hace que el error sea ruidoso e inmediato.</p>
+      </div>
+      <div class="learn-card">
+        <h4>Calibración antes que accuracy</h4>
+        <p>El EV exige una probabilidad real en [0,1]. Sin calibración isotónica el modelo sobreestima a los clientes de alto riesgo y el negocio decidiría con datos falsos.</p>
+      </div>
+      <div class="learn-card">
+        <h4>El <code>interrupt()</code> nativo justifica la dependencia</h4>
+        <p>Un HITL en un grafo cíclico hecho a mano requiere checkpointing, serialización y callbacks. LangGraph lo da en tres líneas; el trade-off de dependencias vale para este patrón.</p>
+      </div>
+      <div class="learn-card">
+        <h4>FastAPI DI desacopla el grafo de los tests</h4>
+        <p>Con <code>dependency_overrides</code> los tests inyectan un grafo mockeado sin levantar servidor: corren en milisegundos y son deterministas.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Roadmap</div>
+    <h2>Siete fases, todas cerradas</h2>
+    <div class="two-col" style="align-items:start">
+      <div class="timeline">
+        <div class="tl"><div class="pill">✓</div><div><h4>Fase 0 · Setup</h4><p>Repo, entorno uv, CI y docs base.</p></div></div>
+        <div class="tl"><div class="pill">✓</div><div><h4>Fase 1 · Datos</h4><p>Descarga, validación y split sin leakage.</p></div></div>
+        <div class="tl"><div class="pill">✓</div><div><h4>Fase 2 · Modelo</h4><p>Propensión calibrada + SHAP + baselines.</p></div></div>
+        <div class="tl"><div class="pill">✓</div><div><h4>Fase 3 · Agente</h4><p>LangGraph ReAct + guardrails + HITL.</p></div></div>
+      </div>
+      <div class="timeline">
+        <div class="tl"><div class="pill">✓</div><div><h4>Fase 4 · API</h4><p>FastAPI REST + Swagger + tests.</p></div></div>
+        <div class="tl"><div class="pill">✓</div><div><h4>Fase 5 · Evaluación</h4><p>Eval set determinista + gate en CI.</p></div></div>
+        <div class="tl"><div class="pill">✓</div><div><h4>Fase 6 · Observabilidad</h4><p>Tracing de costo y latencia por sesión.</p></div></div>
+        <div class="tl"><div class="pill">✓</div><div><h4>Fase 7 · Demo</h4><p>Streamlit offline + deploy en HF Spaces.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Honestidad técnica</div>
+    <h2>Qué NO hace</h2>
+    <p class="section-intro">Declarar el alcance real es parte de la credibilidad del sistema.</p>
+    <ul class="lim">
+      <li><b>Snapshot point-in-time:</b> sin dimensión temporal → propensión en un momento, no probabilidad a N días.</li>
+      <li><b>Datos sintéticos:</b> el modelo rinde mejor de lo que cabría esperar en producción.</li>
+      <li><b>Estado HITL en memoria:</b> <code>MemorySaver</code> se pierde al reiniciar; en producción sería <code>PostgresSaver</code>.</li>
+      <li><b>Sin uplift model:</b> los <code>retention_uplift</code> son supuestos; se calibrarían con un A/B real.</li>
+      <li><b>Acción mock:</b> el agente registra la decisión, no envía mensajes reales al cliente.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="final">
+  <div class="wrap">
+    <h2>¿Lo vemos en vivo?</h2>
+    <p class="section-intro" style="margin: 0 auto 30px;">
+      La demo arranca sin secretos ni instalación. El código, los ADRs y el CHANGELOG
+      cuentan el resto de la historia.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://huggingface.co/spaces/victorlr94/churn-retention-agent" target="_blank" rel="noopener">▶ Abrir la demo</a>
+      <a class="btn btn-ghost" href="https://github.com/victorlr94/churn-retention-agent" target="_blank" rel="noopener">★ Explorar el repositorio</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="muted">Churn Retention Agent · Proyecto de portafolio · Licencia MIT</span>
+    <div class="flinks">
+      <a href="https://github.com/victorlr94/churn-retention-agent" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://huggingface.co/spaces/victorlr94/churn-retention-agent" target="_blank" rel="noopener">Demo</a>
+      <a href="https://github.com/victorlr94/churn-retention-agent/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
