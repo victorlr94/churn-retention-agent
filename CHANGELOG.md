@@ -5,6 +5,8 @@ el proyecto sigue [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.7.1] — 2026-06-24
+
 ### Added
 
 - `docs/index.html`: página de presentación del proyecto para reclutadores — propósito, arquitectura, stack, métricas del modelo, guardrails y aprendizajes, en una sola página autocontenida (sin dependencias externas).
@@ -148,7 +150,8 @@ el proyecto sigue [SemVer](https://semver.org/lang/es/).
 - Secretos fuera del repo: `.gitignore` de `.env*`, `.env.example` sin valores,
   gitleaks y `detect-private-key` en pre-commit.
 
-[Unreleased]: https://github.com/victorlr94/churn-retention-agent/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/victorlr94/churn-retention-agent/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/victorlr94/churn-retention-agent/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/victorlr94/churn-retention-agent/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/victorlr94/churn-retention-agent/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/victorlr94/churn-retention-agent/compare/v0.4.0...v0.5.0
